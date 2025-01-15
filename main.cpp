@@ -6,66 +6,6 @@
 #include "./clay.h"
 #include "./raylib/clay_renderer_raylib.c"
 
-/*
-    This document shows the Clay library introductory video example without using the macro API.
-    It also allows for std::strings, and demostrates changing text dynamically.
-    It also encapsulates initialization, updates, and rendering in appropriate functions.
-    It also encapsulates configuration calls into simplified functions.
-
-    Those familiar with the standard clay library macro API:
-    When CLAY macro expands, it looks something like this:
-        for ( 
-            CLAY__ELEMENT_DEFINITION_LATCH = (
-                Clay__OpenElement(), 
-                // parameter/configuration expansions here
-                Clay__ElementPostConfiguration(), 
-                0
-            ); 
-            CLAY__ELEMENT_DEFINITION_LATCH < 1; 
-            ++CLAY__ELEMENT_DEFINITION_LATCH, 
-            Clay__CloseElement() 
-        
-        ){
-            //children macro expansions here
-        }
-
-    Which ultimately does this:
-        Clay__OpenElement();
-        // parameter/configuration expansions here
-        Clay__ElementPostConfiguration();
-        //children macro expansions here
-        Clay__CloseElement();
-
-    So when nesting clay elements like this:
-        CLAY(
-            //params
-        ){
-            CLAY(
-                //params
-            ){
-                CLAY(
-                    //params
-                ){}
-            }
-        }
-
-    It expands to something like this:
-        Clay__OpenElement(); //begin macro 1
-        //macro 1 parameter/configuration expansions here
-        Clay__ElementPostConfiguration(); //macro 1 post config
-        //children macro 1 start
-        Clay__OpenElement(); //begin macro 2
-        //macro 2 parameter/configuration expansions here
-        Clay__ElementPostConfiguration(); //macro 1 post config
-        //children macro 2 start
-        Clay__OpenElement(); //begin macro 3
-        //macro 3 parameter/configuration expansions here
-        Clay__ElementPostConfiguration(); //macro 1 post config
-        Clay__CloseElement(); //macro 3 has no children
-        Clay__CloseElement(); //children macro 2 end
-        Clay__CloseElement(); //children macro 1 end
-*/
-
 ////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////helper functions//////////////////////////////////////
 
@@ -195,7 +135,7 @@ void clayTextElement(Clay_String text, Clay_TextElementConfig textElementConfig)
 }
 
 //////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////app-specific//////////////////////////////////////
+////////////////////////////////app-specific globals//////////////////////////////
 
 //debug switch for single-use logging/action in a loop
 bool oneshot = false;
@@ -250,7 +190,7 @@ Clay_RectangleElementConfig contentBackgroundConfig = {
     .cornerRadius = 8
 };
 
-///////////////app globals
+///////////////app data
 
 //document struct
 typedef struct {
@@ -324,7 +264,9 @@ void RenderDropdownMenuItem(Clay_String text) {
     Clay__CloseElement();
 }
 
-//main layout function call
+/////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////main layout function//////////////////////////////////
+
 Clay_RenderCommandArray buildLayout(){
     Clay_BeginLayout(); //START LAYOUT
 
@@ -528,7 +470,7 @@ Clay_RenderCommandArray buildLayout(){
 }
 
 /////////////////////////////////////////////////////////////////////
-///////////////////////begin application/////////////////////////////
+///////////////////////application///////////////////////////////////
 int main(void) {
 
     //initialize Clay and Raylib
