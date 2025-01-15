@@ -89,6 +89,8 @@ void RenderHeaderButton(Clay_String text) {
     Clay__CloseElement();
 }
 ```
+NOTE: `applyClayLayoutConfig`, `applyClayRectangleConfig` and `clayTextElement` are helper functions that contain the expansions of `CLAY_LAYOUT`, `CLAY_RECTANGLE`, `CLAY_TEXT` ( and `CLAY_TEXT_CONFIG`).
+
 The Macro based version would look like this
 ```cpp
 void RenderHeaderButton(Clay_String text) {
