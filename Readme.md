@@ -83,7 +83,7 @@ void RenderHeaderButton(Clay_String text) {
     .fontSize = 16 
     .fontId = FONT_ID_BODY_16, 
     .textColor = { 255, 255, 255, 255 }, 
-});
+    });
 
     //end {children}
     Clay__CloseElement();
