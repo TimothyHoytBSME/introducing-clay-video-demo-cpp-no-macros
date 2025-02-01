@@ -15,7 +15,7 @@ void HandleClayErrors(Clay_ErrorData errorData) {
 }
 
 //called to initialize clay
-void initClay(float windowWidth, float windowHeight, Clay_Dimensions (*measureTextFunction)(Clay_String *text, Clay_TextElementConfig *config)){
+void initClay(float windowWidth, float windowHeight, Clay_Dimensions (*measureTextFunction)(Clay_StringSlice text, Clay_TextElementConfig *config, uintptr_t userData)){
     uint64_t clayRequiredMemory = Clay_MinMemorySize();
     Clay_Arena clayMemory = Clay_CreateArenaWithCapacityAndMemory(clayRequiredMemory, malloc(clayRequiredMemory));
 
@@ -24,7 +24,7 @@ void initClay(float windowWidth, float windowHeight, Clay_Dimensions (*measureTe
        .height = windowHeight
     }, (Clay_ErrorHandler) { HandleClayErrors });
 
-    Clay_SetMeasureTextFunction(measureTextFunction);
+    Clay_SetMeasureTextFunction(measureTextFunction, {0});
 }
 
 //called to initialize Raylib //TODO, allow multiple fonts to be passed

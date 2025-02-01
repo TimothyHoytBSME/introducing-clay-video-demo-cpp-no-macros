@@ -35,7 +35,7 @@ typedef struct
     CustomLayoutElementType type;
     union {
         CustomLayoutElement_3DModel model;
-    };
+    } customData;
 } CustomLayoutElement;
 
 // Get a ray trace from the screen position (i.e mouse) within a specific section of the screen
@@ -87,10 +87,8 @@ Ray GetScreenToWorldPointWithZDistance(Vector2 position, Camera camera, int scre
     return ray;
 }
 
-uint32_t measureCalls = 0;
 
-static inline Clay_Dimensions Raylib_MeasureText(Clay_String *text, Clay_TextElementConfig *config) {
-    measureCalls++;
+static inline Clay_Dimensions Raylib_MeasureText(Clay_StringSlice text, Clay_TextElementConfig *config, uintptr_t userData) {
     // Measure string size for Font
     Clay_Dimensions textSize = { 0 };
 
@@ -99,16 +97,19 @@ static inline Clay_Dimensions Raylib_MeasureText(Clay_String *text, Clay_TextEle
 
     float textHeight = config->fontSize;
     Font fontToUse = Raylib_fonts[config->fontId].font;
+    // Font failed to load, likely the fonts are in the wrong place relative to the execution dir
+    if (!fontToUse.glyphs) return textSize;
+
     float scaleFactor = config->fontSize/(float)fontToUse.baseSize;
 
-    for (int i = 0; i < text->length; ++i)
+    for (int i = 0; i < text.length; ++i)
     {
-        if (text->chars[i] == '\n') {
+        if (text.chars[i] == '\n') {
             maxTextWidth = fmax(maxTextWidth, lineTextWidth);
             lineTextWidth = 0;
             continue;
         }
-        int index = text->chars[i] - 32;
+        int index = text.chars[i] - 32;
         if (fontToUse.glyphs[index].advanceX != 0) lineTextWidth += fontToUse.glyphs[index].advanceX;
         else lineTextWidth += (fontToUse.recs[index].width + fontToUse.glyphs[index].offsetX);
     }
@@ -129,7 +130,6 @@ void Clay_Raylib_Initialize(int width, int height, const char *title, unsigned i
 
 void Clay_Raylib_Render(Clay_RenderCommandArray renderCommands)
 {
-    measureCalls = 0;
     for (int j = 0; j < renderCommands.length; j++)
     {
         Clay_RenderCommand *renderCommand = Clay_RenderCommandArray_Get(&renderCommands, j);
@@ -138,7 +138,7 @@ void Clay_Raylib_Render(Clay_RenderCommandArray renderCommands)
         {
             case CLAY_RENDER_COMMAND_TYPE_TEXT: {
                 // Raylib uses standard C strings so isn't compatible with cheap slices, we need to clone the string to append null terminator
-                Clay_String text = renderCommand->text;
+                Clay_StringSlice text = renderCommand->text;
                 char *cloned = (char *)malloc(text.length + 1);
                 memcpy(cloned, text.chars, text.length);
                 cloned[text.length] = '\0';
@@ -216,7 +216,7 @@ void Clay_Raylib_Render(Clay_RenderCommandArray renderCommands)
                         float scaleValue = CLAY__MIN(CLAY__MIN(1, 768 / rootBox.height) * CLAY__MAX(1, rootBox.width / 1024), 1.5f);
                         Ray positionRay = GetScreenToWorldPointWithZDistance((Vector2) { renderCommand->boundingBox.x + renderCommand->boundingBox.width / 2, renderCommand->boundingBox.y + (renderCommand->boundingBox.height / 2) + 20 }, Raylib_camera, (int)roundf(rootBox.width), (int)roundf(rootBox.height), 140);
                         BeginMode3D(Raylib_camera);
-                            DrawModel(customElement->model.model, positionRay.position, customElement->model.scale * scaleValue, WHITE);        // Draw 3d model with texture
+                            DrawModel(customElement->customData.model.model, positionRay.position, customElement->customData.model.scale * scaleValue, WHITE);        // Draw 3d model with texture
                         EndMode3D();
                         break;
                     }
